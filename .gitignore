@@ -5,3 +5,5 @@ __pycache__/
 .idea/
 *.f3d
 *.f3z
+build_log.txt
+.pytest_cache/

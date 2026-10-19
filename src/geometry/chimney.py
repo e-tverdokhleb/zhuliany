@@ -1,1 +1,0 @@
-"""Main chimney component generation."""

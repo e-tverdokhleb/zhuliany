@@ -1,1 +1,0 @@
-"""Wall geometry generation."""

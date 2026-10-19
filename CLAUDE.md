@@ -15,3 +15,9 @@
 7. Після кожного помітного етапу оновлюй `docs/model_status.md`.
 
 Перед реалізацією Phase 1 прочитай `prompts/phase1_parametric_shell.md`.
+
+## Як перевіряти зміни
+- `python tools/preview_plan.py` — 2D-превʼю `docs/plan_preview.png` і звіт `docs/validation_report.md`.
+- `python tests/test_model.py` — тести ядра і smoke-тест коду Fusion на підробленому API.
+- Плани БТІ та їх розшифровка — `data/plans/bti_notes.md`.
+

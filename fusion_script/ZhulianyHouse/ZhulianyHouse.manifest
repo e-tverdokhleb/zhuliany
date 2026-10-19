@@ -1,0 +1,10 @@
+{
+  "autodeskProduct": "Fusion360",
+  "type": "script",
+  "author": "Egorro + Claude",
+  "description": {
+    "": "Параметрична модель будинку Потоцького 65 з data/house_config.json"
+  },
+  "supportedOS": "windows|mac",
+  "editEnabled": true
+}

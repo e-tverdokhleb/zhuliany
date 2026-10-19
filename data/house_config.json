@@ -1,34 +1,222 @@
 {
-  "project": {"name": "Zhuliany_House", "units": "mm", "version": "0.1"},
-  "defaults": {
-    "floor_1_height": {"value": 2700, "status": "APPROX"},
-    "floor_slab_thickness": {"value": 150, "status": "APPROX"},
-    "ceiling_thickness": {"value": 120, "status": "APPROX"},
-    "exterior_wall_thickness": {"value": 380, "status": "APPROX"},
-    "interior_wall_thickness": {"value": 120, "status": "APPROX"},
-    "door_height_default": {"value": 2050, "status": "APPROX"},
-    "door_width_default": {"value": 800, "status": "APPROX"},
-    "window_sill_height_default": {"value": 900, "status": "APPROX"},
-    "window_height_default": {"value": 1400, "status": "APPROX"}
+  "project": {
+    "name": "Zhuliany_House",
+    "units": "mm",
+    "version": "0.2",
+    "origin": "Зовнішній нижній лівий кут будинку на аркуші БТІ (поверх I). X — вправо по аркушу, Y — вгору по аркушу. Сторони світу НЕ підтверджені, тому сторони кімнат називаються bottom/top/left/right відносно аркуша БТІ.",
+    "status_legend": {
+      "BTI": "цифра прямо з плану БТІ",
+      "CALC": "обчислено з кількох цифр БТІ",
+      "DERIVED": "виведено непрямо (з площі, суміжності, замикання розмірів)",
+      "APPROX": "оцінено за масштабом креслення / фото, похибка ~0.1-0.3 м",
+      "UNKNOWN": "даних немає, стоїть тимчасове значення",
+      "MEASURED": "виміряно рулеткою (найвища довіра)"
+    }
   },
-  "walls": [],
-  "doors": [],
-  "windows": [],
+
+  "params": {
+    "bti_ext_left":          {"value": 10850, "status": "BTI",  "source": "поверх I, лівий фасад 10.85"},
+    "bti_ext_bottom_left":   {"value": 3810,  "status": "BTI",  "source": "нижній фасад, ліва ділянка 3.81"},
+    "bti_ext_bottom_right":  {"value": 7110,  "status": "BTI",  "source": "нижній фасад, права ділянка 7.11"},
+    "bti_ext_right_low":     {"value": 4430,  "status": "BTI",  "source": "правий фасад, нижня ділянка 4.43"},
+    "bti_ext_right_high":    {"value": 6560,  "status": "BTI",  "source": "правий фасад, верхня ділянка 6.56"},
+    "bti_ext_top_right":     {"value": 7710,  "status": "BTI",  "source": "верхній фасад, права ділянка 7.71"},
+
+    "exterior_wall_thickness": {"value": 400, "status": "CALC",   "source": "3.81 (фасад) − 3.41 (кухня) = 0.40", "fusion": true},
+    "bearing_wall_thickness":  {"value": 400, "status": "APPROX", "source": "масштаб креслення ~0.40", "fusion": true},
+    "interior_wall_thickness": {"value": 200, "status": "APPROX", "source": "масштаб креслення 0.15-0.26; 0.20 замикає лівий фасад 10.85", "fusion": true},
+
+    "floor_1_height":       {"value": 2640, "status": "APPROX", "source": "максимальна H з БТІ (2.50 / 2.58 / 2.64)", "fusion": true},
+    "floor_slab_thickness": {"value": 150,  "status": "UNKNOWN", "fusion": true},
+    "ceiling_thickness":    {"value": 120,  "status": "UNKNOWN", "fusion": true},
+
+    "door_height_default":        {"value": 2050, "status": "UNKNOWN", "fusion": true},
+    "door_width_default":         {"value": 800,  "status": "UNKNOWN", "fusion": true},
+    "window_sill_height_default": {"value": 900,  "status": "UNKNOWN", "fusion": true},
+    "window_height_default":      {"value": 1400, "status": "UNKNOWN", "fusion": true},
+
+    "house_width":        {"value": "bti_ext_bottom_left + bti_ext_bottom_right", "status": "CALC"},
+    "house_depth_right":  {"value": "bti_ext_right_low + bti_ext_right_high",    "status": "CALC"}
+  },
+
+  "footprint": {
+    "status": "APPROX",
+    "note": "Контур за зовнішніми розмірами БТІ. Лівий фасад 10.85, правий 10.99 — тому вгорі сходинка 0.14 м там, де починається розмір 7.71. На кресленні її не видно, це розбіжність БТІ в межах похибки.",
+    "points": [
+      ["0", "0"],
+      ["house_width", "0"],
+      ["house_width", "house_depth_right"],
+      ["house_width - bti_ext_top_right", "house_depth_right"],
+      ["house_width - bti_ext_top_right", "bti_ext_left"],
+      ["0", "bti_ext_left"]
+    ]
+  },
+
   "rooms": [
-    {"id": "ROOM_CORRIDOR", "name": "Загальний коридор", "status": "KNOWN_NAME"},
-    {"id": "ROOM_MAX", "name": "Кімната Макса", "status": "KNOWN_NAME"},
-    {"id": "ROOM_VOVA", "name": "Кімната дяді Вови", "status": "KNOWN_NAME"},
-    {"id": "ROOM_KITCHEN", "name": "Кухня", "status": "KNOWN_NAME"},
-    {"id": "ROOM_BATH", "name": "Санвузол", "status": "NUMBER_TODO"},
-    {"id": "ROOM_ENTRY", "name": "Прихожа / тамбур", "status": "KNOWN_NAME"},
-    {"id": "ROOM_LIVING", "name": "Вітальня", "status": "KNOWN_NAME"},
-    {"id": "ROOM_BED", "name": "Спальня", "status": "KNOWN_NAME"},
-    {"id": "ROOM_STORAGE", "name": "Кладова / комора", "status": "KNOWN_NAME"},
-    {"id": "ROOM_BOILER", "name": "Котельна / технічна зона", "status": "KNOWN_NAME"},
-    {"id": "ROOM_CHIMNEY_PASSAGE", "name": "Вузький прохід із димоходом", "status": "KNOWN_NAME"}
+    {
+      "id": "R01", "bti_no": 1, "bti_area": 6.2,
+      "name": "Прихожа (головний вхід)", "name_status": "APPROX",
+      "x": {"value": "R02.right + bearing_wall_thickness", "status": "CALC"},
+      "y": {"value": "exterior_wall_thickness", "status": "CALC"},
+      "w": {"value": 1680, "status": "BTI"},
+      "l": {"value": 3720, "status": "BTI"}
+    },
+    {
+      "id": "R02", "bti_no": 2, "bti_area": 19.1,
+      "name": "Кухня", "name_status": "BTI", "name_source": "на БТІ мийка й плита",
+      "x": {"value": "exterior_wall_thickness", "status": "CALC"},
+      "y": {"value": "exterior_wall_thickness", "status": "CALC"},
+      "w": {"value": 3410, "status": "BTI"},
+      "l": {"value": 5600, "status": "DERIVED", "source": "площа 19.1 / 3.41; на БТІ ділянки 3.47 + 2.05 + коротка перегородка"},
+      "h": {"value": 2500, "status": "BTI"}
+    },
+    {
+      "id": "R03", "bti_no": 3, "bti_area": 4.4,
+      "name": "Котельня (бузкова)", "name_status": "APPROX", "name_source": "символ котла на БТІ + фото",
+      "x": {"value": "exterior_wall_thickness", "status": "CALC"},
+      "y": {"value": "R04.y - interior_wall_thickness - R03.l", "status": "CALC"},
+      "w": {"value": 2720, "status": "BTI"},
+      "l": {"value": 2000, "status": "BTI"},
+      "chamfers": [
+        {"corner": "top_right", "dx": 1588, "dy": 1244, "status": "DERIVED",
+         "source": "діагональна стіна до санвузла; паралельна скосу R05 на відстані товщини стіни; площа виходить 4.45 (БТІ 4.4)"}
+      ]
+    },
+    {
+      "id": "R04", "bti_no": 4, "bti_area": 2.1,
+      "name": "Вузький прохід з димоходом (задній вхід)", "name_status": "APPROX", "name_source": "фото: вхід з вулиці, вікно збоку, піч з трубою",
+      "x": {"value": "exterior_wall_thickness", "status": "CALC"},
+      "y": {"value": "bti_ext_left - exterior_wall_thickness - R04.l", "status": "CALC"},
+      "w": {"value": 1000, "status": "BTI"},
+      "l": {"value": 2060, "status": "BTI"}
+    },
+    {
+      "id": "R05", "bti_no": 5, "bti_area": 4.3,
+      "name": "Санвузол", "name_status": "BTI", "name_source": "на БТІ ванна, унітаз, умивальник",
+      "x": {"value": "R04.right + interior_wall_thickness", "status": "CALC"},
+      "y": {"value": "bti_ext_left - exterior_wall_thickness - R05.l", "status": "CALC"},
+      "w": {"value": 1680, "status": "BTI"},
+      "l": {"value": 2730, "status": "BTI", "source": "2.73 — права сторона; ліва коротша через скіс"},
+      "chamfers": [
+        {"corner": "bottom_left", "dx": 855, "dy": "R04.y - R05.y", "status": "DERIVED",
+         "source": "скіс до R04; dx підібрано, щоб площа = 4.3"}
+      ]
+    },
+    {
+      "id": "R06", "bti_no": 6, "bti_area": 0.5,
+      "name": "Прохід 0.5 м²", "name_status": "BTI",
+      "x": {"value": "R03.right + interior_wall_thickness", "status": "CALC"},
+      "y": {"value": "R03.y", "status": "APPROX"},
+      "w": {"value": "R02.right - R06.x", "status": "DERIVED", "source": "до несучої стіни"},
+      "l": {"value": "R08.y - interior_wall_thickness - R06.y", "status": "DERIVED", "source": "до стіни кімнати 8"}
+    },
+    {
+      "id": "R07", "bti_no": 7, "bti_area": 9.6,
+      "name": "Хол / загальний коридор", "name_status": "APPROX",
+      "x": {"value": "R01.x", "status": "APPROX", "source": "на кресленні ліва стіна холу ≈ на лінії лівої стіни прихожої"},
+      "y": {"value": "R09.y", "status": "APPROX", "source": "на кресленні низ холу ≈ низ кімнати 9"},
+      "w": {"value": 3670, "status": "BTI"},
+      "l": {"value": 2610, "status": "BTI"}
+    },
+    {
+      "id": "R08", "bti_no": 8, "bti_area": 14.2,
+      "name": "Житлова 14.2 (з піччю)", "name_status": "UNKNOWN",
+      "x": {"value": "R10.x - interior_wall_thickness - R08.w", "status": "CALC"},
+      "y": {"value": "R07.top + interior_wall_thickness", "status": "CALC"},
+      "w": {"value": 4240, "status": "BTI"},
+      "l": {"value": 3590, "status": "BTI", "source": "УВАГА: 4.24 × 3.59 = 15.2 м², а БТІ пише 14.2. Площа натякає на ~3.35"},
+      "h": {"value": 2580, "status": "BTI"}
+    },
+    {
+      "id": "R09", "bti_no": 9, "bti_area": 1.8,
+      "name": "Комора 1.8", "name_status": "APPROX",
+      "x": {"value": "R07.right + interior_wall_thickness", "status": "CALC"},
+      "y": {"value": "R10.y - interior_wall_thickness - R09.l", "status": "CALC"},
+      "w": {"value": 860, "status": "BTI"},
+      "l": {"value": 2090, "status": "DERIVED", "source": "площа 1.8 / 0.86"}
+    },
+    {
+      "id": "R10", "bti_no": 10, "bti_area": 10.0,
+      "name": "Житлова 10.0", "name_status": "UNKNOWN",
+      "x": {"value": "house_width - exterior_wall_thickness - R10.w", "status": "CALC"},
+      "y": {"value": "house_depth_right - exterior_wall_thickness - R10.l", "status": "CALC"},
+      "w": {"value": 2520, "status": "BTI"},
+      "l": {"value": 3920, "status": "BTI"}
+    },
+    {
+      "id": "R11", "bti_no": 11, "bti_area": 5.7,
+      "name": "Сходи на мансарду", "name_status": "BTI",
+      "x": {"value": "R09.right + interior_wall_thickness", "status": "CALC"},
+      "y": {"value": "R09.y", "status": "APPROX"},
+      "w": {"value": "house_width - exterior_wall_thickness - R11.x", "status": "DERIVED", "source": "до зовнішньої стіни"},
+      "l": {"value": "R09.l", "status": "APPROX", "source": "розмірів сходів на БТІ немає; площа 5.7 сюди не влазить"}
+    },
+    {
+      "id": "R12", "bti_no": 12, "bti_area": 16.1,
+      "name": "Житлова 16.1", "name_status": "UNKNOWN",
+      "x": {"value": "house_width - exterior_wall_thickness - R12.w", "status": "CALC"},
+      "y": {"value": "exterior_wall_thickness", "status": "CALC"},
+      "w": {"value": 4430, "status": "BTI"},
+      "l": {"value": 3630, "status": "BTI"},
+      "h": {"value": 2640, "status": "BTI"}
+    }
   ],
+
+  "openings": {
+    "note": "БТІ не дає розмірів і положень дверей та вікон. Усі значення нижче зняті з масштабу фото креслення (APPROX, ±0.2 м). offset рахується від лівого кінця сторони для bottom/top і від нижнього кінця для left/right; для скосу (side: chamfer0) — від його початку.",
+    "items": [
+      {"id": "D01", "type": "door",   "room": "R01", "side": "bottom", "offset": 310,  "width": 1000, "status": "APPROX", "note": "головний вхід (ґанок з аркою)"},
+      {"id": "D02", "type": "door",   "room": "R04", "side": "top",    "offset": 100,  "status": "APPROX", "note": "задній вхід з ґанку 3.00×1.40"},
+      {"id": "D03", "type": "door",   "room": "R10", "side": "top",    "offset": 1200, "status": "APPROX", "note": "вхід з ґанку 1.70×1.50"},
+      {"id": "D04", "type": "door",   "room": "R04", "side": "bottom", "offset": 150,  "width": 700, "status": "APPROX", "note": "прохід → котельня"},
+      {"id": "D05", "type": "door",   "room": "R03", "side": "chamfer0", "offset": 1180, "width": 700, "status": "APPROX", "note": "котельня → санвузол (у скошеній стіні)"},
+      {"id": "D06", "type": "door",   "room": "R03", "side": "bottom", "offset": 1900, "width": 700, "status": "APPROX", "note": "котельня → кухня"},
+      {"id": "D07", "type": "door",   "room": "R03", "side": "right",  "offset": 30,   "width": 700, "status": "APPROX", "note": "котельня → прохід 6"},
+      {"id": "D08", "type": "door",   "room": "R06", "side": "right",  "offset": 50,   "width": 700, "status": "APPROX", "note": "прохід 6 → хол"},
+      {"id": "D09", "type": "door",   "room": "R02", "side": "right",  "offset": 4660, "status": "APPROX", "note": "кухня → хол"},
+      {"id": "D10", "type": "door",   "room": "R02", "side": "right",  "offset": 870,  "status": "APPROX", "note": "кухня → прихожа"},
+      {"id": "D11", "type": "door",   "room": "R07", "side": "bottom", "offset": 390,  "status": "APPROX", "note": "хол → прихожа"},
+      {"id": "D12", "type": "door",   "room": "R07", "side": "bottom", "offset": 2570, "status": "APPROX", "note": "хол → кімната 12"},
+      {"id": "D13", "type": "door",   "room": "R07", "side": "top",    "offset": 1370, "status": "APPROX", "note": "хол → кімната 8"},
+      {"id": "D14", "type": "door",   "room": "R07", "side": "right",  "offset": 280,  "status": "APPROX", "note": "хол → комора 9"},
+      {"id": "D15", "type": "door",   "room": "R09", "side": "top",    "offset": 30,   "status": "APPROX", "note": "комора 9 → кімната 10"},
+      {"id": "D16", "type": "door",   "room": "R09", "side": "right",  "offset": 1250, "width": 700, "status": "APPROX", "note": "комора 9 → сходи"},
+
+      {"id": "W01", "type": "window", "room": "R02", "side": "bottom", "offset": 850,  "width": 1000, "status": "APPROX"},
+      {"id": "W02", "type": "window", "room": "R02", "side": "bottom", "offset": 2000, "width": 1000, "status": "APPROX"},
+      {"id": "W03", "type": "window", "room": "R02", "side": "left",   "offset": 4000, "width": 1000, "status": "APPROX"},
+      {"id": "W04", "type": "window", "room": "R03", "side": "left",   "offset": 290,  "width": 950,  "status": "APPROX"},
+      {"id": "W05", "type": "window", "room": "R04", "side": "left",   "offset": 150,  "width": 760,  "status": "APPROX"},
+      {"id": "W06", "type": "window", "room": "R05", "side": "top",    "offset": 60,   "width": 850,  "status": "APPROX", "note": "над ванною"},
+      {"id": "W07", "type": "window", "room": "R08", "side": "top",    "offset": 730,  "width": 910,  "status": "APPROX"},
+      {"id": "W08", "type": "window", "room": "R08", "side": "top",    "offset": 2210, "width": 920,  "status": "APPROX"},
+      {"id": "W09", "type": "window", "room": "R10", "side": "right",  "offset": 1590, "width": 920,  "status": "APPROX"},
+      {"id": "W10", "type": "window", "room": "R11", "side": "right",  "offset": 460,  "width": 910,  "status": "APPROX"},
+      {"id": "W11", "type": "window", "room": "R12", "side": "bottom", "offset": 1190, "width": 990,  "status": "APPROX"},
+      {"id": "W12", "type": "window", "room": "R12", "side": "bottom", "offset": 2290, "width": 990,  "status": "APPROX"}
+    ]
+  },
+
   "chimneys": [
-    {"id": "Chimney_Main", "position": {"x": null, "y": null}, "diameter_or_width": null, "height": null, "status": "UNKNOWN"}
+    {
+      "id": "Chimney_Main", "room": "R04",
+      "x": {"value": "R04.x + R04.w / 2", "status": "UNKNOWN", "source": "тимчасово — центр проходу"},
+      "y": {"value": "R04.y + R04.l / 2", "status": "UNKNOWN", "source": "тимчасово — центр проходу"},
+      "diameter": {"value": 200, "status": "APPROX", "source": "оцінка з фото"},
+      "height":   {"value": "floor_1_height", "status": "UNKNOWN", "source": "вище стелі — поки не моделюється"}
+    }
   ],
-  "repair_tags": ["OK", "INSPECT", "PLASTER_REPAIR", "MOISTURE", "WATERPROOFING", "HEATING_PIPE", "ELECTRICAL", "UNKNOWN"]
+
+  "outlines": {
+    "note": "Лише контури в ескізі, без об'єму: висоти невідомі.",
+    "items": [
+      {"id": "Porch_Back_Left",  "component": "Exterior", "rect": ["0", "bti_ext_left", 3000, 1400], "status": "BTI", "note": "ґанок 3.00×1.40 зі сходами; прив'язка до кута APPROX"},
+      {"id": "Porch_Back_Right", "component": "Exterior", "rect": ["R10.right - 1700", "house_depth_right", 1700, 1500], "status": "APPROX", "note": "ґанок 1.70×1.50 зі сходами"},
+      {"id": "Porch_Front",      "component": "Exterior", "rect": [3790, -1500, 2260, 1500], "status": "APPROX", "note": "головний ґанок з аркою (на кресленні №1)"},
+      {"id": "Stove_R08",        "component": "Technical_Elements", "rect": ["R08.right - 760", "R08.y", 760, 1220], "status": "APPROX", "note": "піч (квадрат з діагоналлю на БТІ) у куті кімнати 8"}
+    ]
+  },
+
+  "repair_tags": ["OK", "INSPECT", "PLASTER_REPAIR", "MOISTURE", "WATERPROOFING", "HEATING_PIPE", "ELECTRICAL", "UNKNOWN"],
+  "repair_marks": []
 }
