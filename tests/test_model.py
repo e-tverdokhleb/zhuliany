@@ -105,6 +105,40 @@ def test_fusion_build_smoke():
     assert design.rootComponent.occurrences.count == 1
 
 
+def _fresh_build(intent):
+    import fake_adsk
+    app, design, messages = fake_adsk.install(intent)
+    for m in list(sys.modules):
+        if m.startswith("zhuliany.fusion"):
+            del sys.modules[m]
+    from zhuliany.fusion import build
+    build.run(app, CFG)
+    return app, design, messages
+
+
+def test_empty_part_document_switches_to_hybrid():
+    """Регресія: Fusion за замовчуванням відкриває Part Design, де можна лише одну компоненту."""
+    app, design, messages = _fresh_build("part")
+    assert design.designIntent == "hybrid"
+    assert not app.created_designs
+    assert "Не вдалося" not in messages[-1][0], messages[-1][0]
+
+
+def test_nonempty_part_document_gets_new_hybrid_doc():
+    import fake_adsk
+    app, design, messages = fake_adsk.install("part")
+    design.rootComponent.bRepBodies._items.append(object())   # у документі вже щось є — не чіпаємо його
+    for m in list(sys.modules):
+        if m.startswith("zhuliany.fusion"):
+            del sys.modules[m]
+    from zhuliany.fusion import build
+    build.run(app, CFG)
+    assert design.designIntent == "part"
+    assert len(app.created_designs) == 1
+    assert app.created_designs[0].rootComponent.occurrences.count == 1
+    assert "Не вдалося" not in messages[-1][0], messages[-1][0]
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_"):

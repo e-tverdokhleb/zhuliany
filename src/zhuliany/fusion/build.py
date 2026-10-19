@@ -30,7 +30,7 @@ class Builder(object):
 
     # ------------------------------------------------------------------
     def run(self):
-        design = components.active_design(self.app)
+        design = components.active_design(self.app, self.log)
         parameters.sync(design, self.house, self.log)
         self.c = components.rebuild_tree(design, self.house.name)
         self.walls()

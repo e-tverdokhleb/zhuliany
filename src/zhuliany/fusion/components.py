@@ -16,11 +16,55 @@ TREE = [
 ]
 
 
-def active_design(app):
+def _hybrid_intent():
+    """DesignIntentTypes.HybridDesignIntentType або None, якщо Fusion старий і intent ще не існує."""
+    types_ = getattr(adsk.fusion, "DesignIntentTypes", None)
+    return getattr(types_, "HybridDesignIntentType", None) if types_ else None
+
+
+def _is_hybrid(design):
+    hybrid = _hybrid_intent()
+    if hybrid is None:
+        return True
+    return getattr(design, "designIntent", hybrid) == hybrid
+
+
+def _is_empty(design):
+    root = design.rootComponent
+    return root.occurrences.count == 0 and root.bRepBodies.count == 0 and root.sketches.count == 0
+
+
+def _new_hybrid_design(app):
+    # Documents.add завжди створює Hybrid-документ (див. Fusion API: DocumentCreation Sample)
+    doc = app.documents.add(adsk.core.DocumentTypes.FusionDesignDocumentType)
+    return adsk.fusion.Design.cast(doc.products.itemByProductType("DesignProductType"))
+
+
+def active_design(app, log=None):
+    """Дизайн, у якому можна створювати компоненти.
+
+    Модель складається з багатьох компонентів, тому потрібен Hybrid-документ.
+    Part-документ (одна компонента) і Assembly (лише зовнішні компоненти) не підходять:
+    порожній документ перемикаємо на Hybrid, інакше відкриваємо новий.
+    """
+    log = log or (lambda m: None)
     design = adsk.fusion.Design.cast(app.activeProduct)
     if design is None:
-        doc = app.documents.add(adsk.core.DocumentTypes.FusionDesignDocumentType)
-        design = adsk.fusion.Design.cast(doc.products.itemByProductType("DesignProductType"))
+        design = _new_hybrid_design(app)
+        log("Створено новий Hybrid-документ")
+    elif not _is_hybrid(design):
+        switched = False
+        if _is_empty(design):
+            try:
+                design.designIntent = _hybrid_intent()
+                switched = _is_hybrid(design)
+            except Exception:
+                switched = False
+        if switched:
+            log("Порожній документ перемкнено на Hybrid")
+        else:
+            design = _new_hybrid_design(app)
+            log("Поточний документ — Part або Assembly; модель будується в новому Hybrid-документі")
     if design.designType != adsk.fusion.DesignTypes.ParametricDesignType:
         design.designType = adsk.fusion.DesignTypes.ParametricDesignType
     return design

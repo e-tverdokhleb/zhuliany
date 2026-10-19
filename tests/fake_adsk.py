@@ -102,13 +102,27 @@ class ExtrudeFeatures(object):
         return feat
 
 
+class _Sketches(object):
+    def __init__(self, comp):
+        self.comp, self.n = comp, 0
+
+    @property
+    def count(self):
+        return self.n
+
+    def add(self, plane):
+        self.n += 1
+        return self.comp._add_sketch(plane)
+
+
 class Component(Entity):
     def __init__(self, design):
         Entity.__init__(self)
         self.design = design
         self.occurrences = Occurrences(design)
+        self.bRepBodies = _Coll()
         self.xYConstructionPlane = object()
-        self.sketches = types.SimpleNamespace(add=self._add_sketch)
+        self.sketches = _Sketches(self)
         self.features = types.SimpleNamespace(extrudeFeatures=ExtrudeFeatures(design.ops))
 
     def _add_sketch(self, plane):
@@ -123,6 +137,8 @@ class Occurrences(_Coll):
         self.design = design
 
     def addNewComponent(self, m):
+        if self.design.designIntent != "hybrid":
+            raise RuntimeError("3 : Failed to create component: Part Design documents can only contain one component")
         occ = types.SimpleNamespace(component=Component(self.design))
         occs = self
         occ.deleteMe = lambda: occs._items.remove(occ)
@@ -144,7 +160,8 @@ class UserParameters(_Coll):
 
 
 class Design(object):
-    def __init__(self):
+    def __init__(self, intent="hybrid"):
+        self.designIntent = intent
         self.ops = []
         self.sketches = []
         self.designType = "parametric"
@@ -157,14 +174,23 @@ class VI(object):
         self.v = v
 
 
-def install():
-    design = Design()
+def install(intent="hybrid"):
+    design = Design(intent)
+    created = []
+
+    def add_document(doc_type):
+        d = Design("hybrid")
+        created.append(d)
+        app.activeProduct = d
+        return types.SimpleNamespace(products=types.SimpleNamespace(itemByProductType=lambda n: d))
+
     messages = []
     app = types.SimpleNamespace(
         activeProduct=design,
         userInterface=types.SimpleNamespace(messageBox=lambda *a: messages.append(a)),
         log=lambda m: None,
-        documents=None,
+        documents=types.SimpleNamespace(add=add_document),
+        created_designs=created,
     )
     core = types.ModuleType("adsk.core")
     core.Point3D = types.SimpleNamespace(create=lambda x, y, z: (x, y, z))
@@ -175,6 +201,8 @@ def install():
     fusion = types.ModuleType("adsk.fusion")
     fusion.Design = types.SimpleNamespace(cast=lambda x: x)
     fusion.DesignTypes = types.SimpleNamespace(ParametricDesignType="parametric")
+    fusion.DesignIntentTypes = types.SimpleNamespace(HybridDesignIntentType="hybrid", PartDesignIntentType="part",
+                                                     AssemblyDesignIntentType="assembly")
     fusion.FeatureOperations = types.SimpleNamespace(NewBodyFeatureOperation="new", CutFeatureOperation="cut")
     fusion.OffsetStartDefinition = types.SimpleNamespace(create=lambda v: ("offset", v))
     fusion.CalculationAccuracy = types.SimpleNamespace(LowCalculationAccuracy=0)
