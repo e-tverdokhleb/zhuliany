@@ -1,0 +1,34 @@
+{
+  "project": {"name": "Zhuliany_House", "units": "mm", "version": "0.1"},
+  "defaults": {
+    "floor_1_height": {"value": 2700, "status": "APPROX"},
+    "floor_slab_thickness": {"value": 150, "status": "APPROX"},
+    "ceiling_thickness": {"value": 120, "status": "APPROX"},
+    "exterior_wall_thickness": {"value": 380, "status": "APPROX"},
+    "interior_wall_thickness": {"value": 120, "status": "APPROX"},
+    "door_height_default": {"value": 2050, "status": "APPROX"},
+    "door_width_default": {"value": 800, "status": "APPROX"},
+    "window_sill_height_default": {"value": 900, "status": "APPROX"},
+    "window_height_default": {"value": 1400, "status": "APPROX"}
+  },
+  "walls": [],
+  "doors": [],
+  "windows": [],
+  "rooms": [
+    {"id": "ROOM_CORRIDOR", "name": "Загальний коридор", "status": "KNOWN_NAME"},
+    {"id": "ROOM_MAX", "name": "Кімната Макса", "status": "KNOWN_NAME"},
+    {"id": "ROOM_VOVA", "name": "Кімната дяді Вови", "status": "KNOWN_NAME"},
+    {"id": "ROOM_KITCHEN", "name": "Кухня", "status": "KNOWN_NAME"},
+    {"id": "ROOM_BATH", "name": "Санвузол", "status": "NUMBER_TODO"},
+    {"id": "ROOM_ENTRY", "name": "Прихожа / тамбур", "status": "KNOWN_NAME"},
+    {"id": "ROOM_LIVING", "name": "Вітальня", "status": "KNOWN_NAME"},
+    {"id": "ROOM_BED", "name": "Спальня", "status": "KNOWN_NAME"},
+    {"id": "ROOM_STORAGE", "name": "Кладова / комора", "status": "KNOWN_NAME"},
+    {"id": "ROOM_BOILER", "name": "Котельна / технічна зона", "status": "KNOWN_NAME"},
+    {"id": "ROOM_CHIMNEY_PASSAGE", "name": "Вузький прохід із димоходом", "status": "KNOWN_NAME"}
+  ],
+  "chimneys": [
+    {"id": "Chimney_Main", "position": {"x": null, "y": null}, "diameter_or_width": null, "height": null, "status": "UNKNOWN"}
+  ],
+  "repair_tags": ["OK", "INSPECT", "PLASTER_REPAIR", "MOISTURE", "WATERPROOFING", "HEATING_PIPE", "ELECTRICAL", "UNKNOWN"]
+}
