@@ -19,5 +19,12 @@
 ## Як перевіряти зміни
 - `python tools/preview_plan.py` — 2D-превʼю `docs/plan_preview.png` і звіт `docs/validation_report.md`.
 - `python tests/test_model.py` — тести ядра і smoke-тест коду Fusion на підробленому API.
+- `freecadcmd tests/freecad_headless.py` — макрос FreeCAD у справжньому FreeCAD 1.x без інтерфейсу
+  (будує двічі, звіряє об'єм прорізів і площі кімнат).
 - Плани БТІ та їх розшифровка — `data/plans/bti_notes.md`.
+
+## Дві програми, одне ядро
+Ядро `src/zhuliany/` (config, geometry2d, openings, validate) не залежить від CAD.
+Адаптери: `src/zhuliany/fusion/` (Fusion 360) і `src/zhuliany/freecad/` (FreeCAD BIM).
+Нова фіча геометрії — спершу в ядро, потім в обидва адаптери. Основна програма користувача — FreeCAD.
 

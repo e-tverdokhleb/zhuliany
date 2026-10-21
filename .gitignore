@@ -7,3 +7,6 @@ __pycache__/
 *.f3z
 build_log.txt
 .pytest_cache/
+*.FCStd
+*.FCBak
+*.FCStd1

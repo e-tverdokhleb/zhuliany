@@ -1,0 +1,53 @@
+# -*- coding: utf-8 -*-
+"""FreeCAD-макрос: будує BIM-модель будинку Потоцького 65 з data/house_config.json.
+
+Запуск: Macro → Macros… → у полі "User macros location" вкажи папку freecad_macro
+цього репозиторію → вибери ZhulianyHouse.FCMacro → Execute.
+Макрос сам знаходить src/ і data/ у репозиторії.
+"""
+
+import os
+import sys
+import traceback
+
+import FreeCAD
+
+try:
+    HERE = os.path.dirname(os.path.abspath(__file__))
+except NameError:  # FreeCAD інколи виконує макрос без __file__
+    HERE = os.path.join(FreeCAD.getUserMacroDir(True))
+REPO = os.path.normpath(os.path.join(HERE, ".."))
+SRC = os.path.join(REPO, "src")
+CONFIG = os.path.join(REPO, "data", "house_config.json")
+
+
+def _show(text):
+    FreeCAD.Console.PrintMessage(text + "\n")
+    if FreeCAD.GuiUp:
+        from PySide import QtGui
+        QtGui.QMessageBox.information(None, "Zhuliany House", text)
+
+
+def _fresh_import():
+    """FreeCAD тримає модулі в пам'яті між запусками — скидаємо їх, щоб підхопити зміни в коді."""
+    if SRC not in sys.path:
+        sys.path.insert(0, SRC)
+    for name in list(sys.modules):
+        if name == "zhuliany" or name.startswith("zhuliany."):
+            del sys.modules[name]
+    from zhuliany.freecad import build
+    return build
+
+
+def main():
+    if not os.path.exists(CONFIG):
+        _show("Не знайдено {}\nМакрос має лежати в папці freecad_macro репозиторію zhuliany.".format(CONFIG))
+        return
+    try:
+        build = _fresh_import()
+        build.run(CONFIG, show=_show)
+    except Exception:
+        _show("Помилка макроса Zhuliany House:\n\n" + traceback.format_exc())
+
+
+main()
