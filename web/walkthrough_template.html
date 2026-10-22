@@ -1,0 +1,555 @@
+<title>Прогулянка Потоцького 65</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: повноекранна 3D-сцена, поверх неї чотири тихі панелі по кутах (як штамп на кресленні БТІ) */
+:root {
+  --paper: #eef0ee;        /* панелі: папір техпаспорта */
+  --ink: #1e2a33;          /* текст: чорнило креслення */
+  --ink-soft: #5b6872;
+  --rule: #c8cfd2;
+  --accent: #2f5d8a;       /* синє чорнило штампу */
+  --warn: #9a5b14;
+  --sky: #dfe6ea;
+  --ground: #b9c4b0;
+  --glass: rgba(238, 240, 238, 0.92);
+  --font-ui: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-num: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1b2228; --ink: #e3e8eb; --ink-soft: #9aa7b0; --rule: #33404a;
+    --accent: #7fb0e0; --warn: #e0a560; --sky: #283540; --ground: #3c4637;
+    --glass: rgba(27, 34, 40, 0.9); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1b2228; --ink: #e3e8eb; --ink-soft: #9aa7b0; --rule: #33404a;
+  --accent: #7fb0e0; --warn: #e0a560; --sky: #283540; --ground: #3c4637;
+  --glass: rgba(27, 34, 40, 0.9); color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: var(--sky); color: var(--ink); font-family: var(--font-ui);
+  overflow: hidden; -webkit-user-select: none; user-select: none; touch-action: none;
+}
+#scene { position: fixed; inset: 0; display: block; width: 100%; height: 100%; }
+.panel {
+  position: fixed; background: var(--glass); border: 1px solid var(--rule);
+  border-radius: 6px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  font-size: 13px; line-height: 1.35;
+}
+#stamp {
+  top: calc(12px + env(safe-area-inset-top, 0px)); left: calc(12px + env(safe-area-inset-left, 0px));
+  padding: 10px 12px; max-width: min(330px, calc(100vw - 24px - 150px));
+}
+#stamp .eyebrow { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+#stamp h1 { font-size: 17px; font-weight: 600; margin: 2px 0 6px; text-wrap: balance; }
+#room { display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; align-items: baseline; }
+#room .code { font-family: var(--font-num); font-weight: 600; color: var(--accent); }
+#room .name { font-weight: 500; }
+#room .area { grid-column: 2; font-family: var(--font-num); font-size: 12px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+#room .tag { grid-column: 2; font-size: 11px; color: var(--warn); }
+#modes {
+  top: calc(12px + env(safe-area-inset-top, 0px)); right: calc(12px + env(safe-area-inset-right, 0px));
+  display: flex; padding: 3px; gap: 3px;
+}
+#modes button {
+  font: 500 13px var(--font-ui); color: var(--ink); background: transparent; border: 0;
+  padding: 7px 11px; border-radius: 4px; cursor: pointer;
+}
+#modes button[aria-pressed="true"] { background: var(--accent); color: var(--paper); }
+#modes button:focus-visible, #help button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#mapwrap {
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px)); left: calc(12px + env(safe-area-inset-left, 0px));
+  padding: 6px;
+}
+#map { display: block; width: 170px; height: 175px; cursor: crosshair; }
+#mapwrap .cap { font-size: 11px; color: var(--ink-soft); text-align: center; margin-top: 2px; }
+#help {
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px)); right: calc(12px + env(safe-area-inset-right, 0px));
+  padding: 10px 12px; max-width: 260px;
+}
+#help dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; margin: 0; }
+#help dt { font-family: var(--font-num); font-size: 12px; color: var(--accent); white-space: nowrap; }
+#help dd { margin: 0; }
+#help .note { margin-top: 8px; font-size: 11px; color: var(--ink-soft); }
+#help button { font: 500 12px var(--font-ui); color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; margin-top: 6px; }
+#help.collapsed dl, #help.collapsed .note, #help dl[hidden] { display: none; }
+#hint {
+  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  padding: 10px 14px; text-align: center; pointer-events: none; font-size: 14px;
+}
+#cross { position: fixed; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; pointer-events: none; }
+#cross::before, #cross::after { content: ""; position: absolute; background: var(--ink); opacity: .55; }
+#cross::before { left: 4px; top: 0; width: 2px; height: 10px; }
+#cross::after { left: 0; top: 4px; width: 10px; height: 2px; }
+#stick { position: fixed; width: 92px; height: 92px; margin: -46px 0 0 -46px; border-radius: 50%;
+  border: 2px solid var(--accent); opacity: .5; pointer-events: none; }
+@media (max-width: 560px) {
+  #help { display: none; }
+  #map { width: 120px; height: 124px; }
+  #stamp h1 { font-size: 15px; }
+  #modes button { padding: 6px 8px; font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<canvas id="scene" aria-label="3D-модель будинку"></canvas>
+<div id="cross" hidden></div>
+<div id="stick" hidden></div>
+
+<section id="stamp" class="panel">
+  <div class="eyebrow">Поверх I · Потоцького 65</div>
+  <h1>3D-прогулянка будинком</h1>
+  <div id="room" aria-live="polite"></div>
+</section>
+
+<div id="modes" class="panel" role="group" aria-label="Режим перегляду">
+  <button id="btnWalk" type="button" aria-pressed="true">Прогулянка</button>
+  <button id="btnOrbit" type="button" aria-pressed="false">Згори</button>
+</div>
+
+<section id="mapwrap" class="panel">
+  <canvas id="map" aria-label="План: натисни, щоб перейти в це місце"></canvas>
+  <div class="cap">План · натисни, щоб перейти</div>
+</section>
+
+<aside id="help" class="panel">
+  <dl id="helpWalk">
+    <dt>клік</dt><dd>керувати мишею (Esc — відпустити)</dd>
+    <dt>W A S D</dt><dd>йти; стрілки теж працюють</dd>
+    <dt>Shift</dt><dd>швидше</dd>
+    <dt>телефон</dt><dd>ліва половина — йти, права — дивитись</dd>
+  </dl>
+  <dl id="helpOrbit" hidden>
+    <dt>тягни</dt><dd>обертати</dd>
+    <dt>колесо</dt><dd>наблизити; на телефоні — двома пальцями</dd>
+    <dt>план</dt><dd>натисни на кімнату — зайдеш у неї</dd>
+  </dl>
+  <div class="note">Стіни й кімнати — з плану БТІ. Двері та вікна стоять приблизно (±0.2 м), поки нема замірів.</div>
+  <button id="helpToggle" type="button">Сховати підказку</button>
+</aside>
+
+<div id="hint" class="panel" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/*__HOUSE_DATA__*/
+</script>
+<script>
+(function () {
+  "use strict";
+  const H = window.HOUSE;
+  const MM = 1 / 1000;
+  const EYE = 1.6, RADIUS = 0.3, WALK = 1.5, RUN = 3.2;
+  const $ = (id) => document.getElementById(id);
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+  // ---------- координати: план (мм, X вправо, Y вгору) → three (м, Y вгору) ----------
+  const P = (x, y, z) => new THREE.Vector3(x * MM, (z || 0) * MM, -y * MM);
+  const xs = H.footprint.map((p) => p[0]), ys = H.footprint.map((p) => p[1]);
+  const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+  const center = P((minX + maxX) / 2, (minY + maxY) / 2, 0);
+  const wallH = H.height * MM;
+
+  // ---------- сцена ----------
+  const canvas = $("scene");
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(70, 1, 0.05, 200);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xd9d5cc, 1.0));
+  const sun = new THREE.DirectionalLight(0xffffff, 0.4);
+  sun.position.set(8, 14, 6);
+  scene.add(sun);
+
+  function applyTheme() {
+    scene.background = new THREE.Color(css("--sky") || "#dfe6ea");
+    ground.material.color.set(css("--ground") || "#b9c4b0");
+    drawMap();
+  }
+
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(80, 80),
+    new THREE.MeshLambertMaterial({ color: 0xb9c4b0 }));
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.set(center.x, -0.01, center.z);
+  scene.add(ground);
+
+  function meshFrom(m) {
+    const g = new THREE.BufferGeometry();
+    const pos = new Float32Array(m.v.length);
+    for (let i = 0; i < m.v.length; i += 3) {
+      const v = P(m.v[i], m.v[i + 1], m.v[i + 2]);
+      pos[i] = v.x; pos[i + 1] = v.y; pos[i + 2] = v.z;
+    }
+    g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    g.setIndex(m.f);
+    const flat = g.toNonIndexed();   // гострі ребра: окремі нормалі для кожної грані
+    flat.computeVertexNormals();
+    return flat;
+  }
+
+  const colliders = [];
+  const MAT = {
+    ext: new THREE.MeshLambertMaterial({ color: 0xcdc6b8, side: THREE.DoubleSide }),
+    int: new THREE.MeshLambertMaterial({ color: 0xeeebe4, side: THREE.DoubleSide }),
+    window: new THREE.MeshLambertMaterial({ color: 0x9cc3e6, transparent: true, opacity: 0.45, side: THREE.DoubleSide, depthWrite: false }),
+    chimney: new THREE.MeshLambertMaterial({ color: 0x6b3a2a }),
+  };
+  H.meshes.forEach((m) => {
+    const mesh = new THREE.Mesh(meshFrom(m), MAT[m.kind] || MAT.int);
+    scene.add(mesh);
+    colliders.push(mesh);
+  });
+
+  // підлога кімнат: кожна своїм тихим відтінком, щоб кімнати читались і згори, і зсередини
+  const shapeOf = (poly) => {
+    const s = new THREE.Shape();
+    poly.forEach((p, i) => (i ? s.lineTo(p[0] * MM, p[1] * MM) : s.moveTo(p[0] * MM, p[1] * MM)));
+    return s;
+  };
+  H.rooms.forEach((r, i) => {
+    const hue = (i * 0.137) % 1;
+    const mat = new THREE.MeshLambertMaterial({ color: new THREE.Color().setHSL(hue, 0.22, 0.72), side: THREE.DoubleSide });
+    const fl = new THREE.Mesh(new THREE.ShapeGeometry(shapeOf(r.poly)), mat);
+    fl.rotation.x = -Math.PI / 2;     // площина XY → підлога; Y плану → −Z three
+    fl.position.y = 0.002;
+    scene.add(fl);
+  });
+  // плита під стінами
+  const slab = new THREE.Mesh(new THREE.ShapeGeometry(shapeOf(H.footprint)), new THREE.MeshLambertMaterial({ color: 0x9a968d, side: THREE.DoubleSide }));
+  slab.rotation.x = -Math.PI / 2;
+  slab.position.y = 0.0005;
+  scene.add(slab);
+  // стеля — видно в прогулянці, сховано згори
+  const ceiling = new THREE.Mesh(new THREE.ShapeGeometry(shapeOf(H.footprint)), new THREE.MeshBasicMaterial({ color: 0xe9e7e1, side: THREE.DoubleSide }));
+  ceiling.rotation.x = -Math.PI / 2;
+  ceiling.position.y = wallH;
+  scene.add(ceiling);
+  // контури ґанків і печі
+  (H.outlines || []).forEach((o) => {
+    const [x, y, w, l] = o.rect;
+    const pts = [[x, y], [x + w, y], [x + w, y + l], [x, y + l], [x, y]].map((p) => P(p[0], p[1], 15));
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: 0x2e7d55 })));
+  });
+
+  // підписи кімнат — тільки в режимі "Згори"
+  const labels = [];
+  const centroid = (poly) => {
+    let a = 0, cx = 0, cy = 0;
+    for (let i = 0; i < poly.length; i++) {
+      const [x1, y1] = poly[i], [x2, y2] = poly[(i + 1) % poly.length];
+      const k = x1 * y2 - x2 * y1;
+      a += k; cx += (x1 + x2) * k; cy += (y1 + y2) * k;
+    }
+    return [cx / (3 * a), cy / (3 * a)];
+  };
+  function labelTexture(r) {
+    const c = document.createElement("canvas");
+    c.width = 512; c.height = 160;
+    const g = c.getContext("2d");
+    g.fillStyle = "rgba(255,255,255,0.88)"; g.fillRect(0, 0, 512, 160);
+    g.fillStyle = "#1e2a33"; g.textAlign = "center";
+    let size = 46;
+    do { g.font = "600 " + size + "px 'IBM Plex Sans Condensed', 'Arial Narrow', sans-serif"; size -= 2; }
+    while (g.measureText(r.name).width > 488 && size > 24);
+    g.fillText(r.name, 256, 66);
+    g.fillStyle = "#2f5d8a"; g.font = "600 38px 'JetBrains Mono', monospace";
+    g.fillText(r.id + " · " + r.area.toFixed(1) + " м²", 256, 128);
+    return new THREE.CanvasTexture(c);
+  }
+  H.rooms.forEach((r) => {
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTexture(r), depthTest: false }));
+    const [cx, cy] = centroid(r.poly);
+    sp.position.copy(P(cx, cy, H.height + 600));
+    sp.scale.set(2.2, 0.69, 1);
+    sp.renderOrder = 10;
+    scene.add(sp);
+    labels.push(sp);
+  });
+  // шрифти довантажуються пізніше за перший кадр — перемальовуємо підписи, коли вони готові
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => labels.forEach((sp, i) => {
+      sp.material.map.dispose();
+      sp.material.map = labelTexture(H.rooms[i]);
+      sp.material.needsUpdate = true;
+    }));
+  }
+
+  // ---------- стан камери ----------
+  const d01 = H.openings.find((o) => o.id === "D01");
+  const startX = d01 ? (d01.p0[0] + d01.p1[0]) / 2 : (minX + maxX) / 2;
+  const player = { pos: P(startX, -1300, 0), yaw: 0, pitch: -0.05 };   // на ґанку, обличчям до входу
+  const orbit = { theta: -0.6, phi: 0.95, r: 17 };
+  let mode = "walk";
+
+  function setMode(m) {
+    mode = m;
+    $("btnWalk").setAttribute("aria-pressed", String(m === "walk"));
+    $("btnOrbit").setAttribute("aria-pressed", String(m === "orbit"));
+    $("helpWalk").hidden = m !== "walk";
+    $("helpOrbit").hidden = m !== "orbit";
+    ceiling.visible = m === "walk";
+    labels.forEach((l) => (l.visible = m === "orbit"));
+    camera.fov = m === "walk" ? 70 : 45;
+    camera.updateProjectionMatrix();
+    if (m === "orbit" && document.pointerLockElement) document.exitPointerLock();
+    showHint(m === "walk" ? (matchMedia("(pointer: coarse)").matches ? "Ліва половина екрана — йти, права — дивитись" : "Клікни по сцені, щоб керувати мишею") : "");
+  }
+  $("btnWalk").addEventListener("click", () => setMode("walk"));
+  $("btnOrbit").addEventListener("click", () => setMode("orbit"));
+  $("helpToggle").addEventListener("click", () => {
+    const c = $("help").classList.toggle("collapsed");
+    $("helpToggle").textContent = c ? "Показати підказку" : "Сховати підказку";
+  });
+
+  let hintTimer = 0;
+  function showHint(text) {
+    const h = $("hint");
+    clearTimeout(hintTimer);
+    if (!text) { h.hidden = true; return; }
+    h.textContent = text; h.hidden = false;
+    hintTimer = setTimeout(() => (h.hidden = true), 3500);
+  }
+
+  // ---------- керування ----------
+  const keys = {};
+  addEventListener("keydown", (e) => {
+    if (e.target.tagName === "BUTTON" && (e.code === "Space" || e.code === "Enter")) return;
+    keys[e.code] = true;
+  });
+  addEventListener("keyup", (e) => (keys[e.code] = false));
+  addEventListener("blur", () => Object.keys(keys).forEach((k) => (keys[k] = false)));
+
+  let locked = false, dragging = null;
+  document.addEventListener("pointerlockchange", () => {
+    locked = document.pointerLockElement === canvas;
+    $("cross").hidden = !locked;
+  });
+  const look = (dx, dy, k) => {
+    player.yaw -= dx * k;
+    player.pitch = Math.max(-1.3, Math.min(1.3, player.pitch - dy * k));
+  };
+  document.addEventListener("mousemove", (e) => { if (locked && mode === "walk") look(e.movementX, e.movementY, 0.0025); });
+
+  // мишка й дотик через pointer events
+  const touches = new Map();
+  const stick = { id: null, x0: 0, y0: 0, dx: 0, dy: 0 };
+  let pinch0 = 0, r0 = 0;
+  canvas.addEventListener("pointerdown", (e) => {
+    canvas.setPointerCapture(e.pointerId);
+    touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (e.pointerType === "mouse") {
+      if (mode === "walk" && !locked && canvas.requestPointerLock) {
+        try { const p = canvas.requestPointerLock(); if (p && p.catch) p.catch(() => {}); } catch (err) { /* без pointer lock — тягни мишею */ }
+      }
+      dragging = { x: e.clientX, y: e.clientY };
+      return;
+    }
+    if (mode === "walk" && e.clientX < innerWidth / 2 && stick.id === null) {
+      Object.assign(stick, { id: e.pointerId, x0: e.clientX, y0: e.clientY, dx: 0, dy: 0 });
+      const s = $("stick"); s.style.left = e.clientX + "px"; s.style.top = e.clientY + "px"; s.hidden = false;
+    }
+    if (mode === "orbit" && touches.size === 2) {
+      const [a, b] = [...touches.values()];
+      pinch0 = Math.hypot(a.x - b.x, a.y - b.y); r0 = orbit.r;
+    }
+  });
+  canvas.addEventListener("pointermove", (e) => {
+    const t = touches.get(e.pointerId);
+    if (!t) return;
+    const dx = e.clientX - t.x, dy = e.clientY - t.y;
+    t.x = e.clientX; t.y = e.clientY;
+    if (mode === "orbit") {
+      if (touches.size === 2 && pinch0) {
+        const [a, b] = [...touches.values()];
+        orbit.r = Math.max(5, Math.min(45, r0 * pinch0 / Math.max(20, Math.hypot(a.x - b.x, a.y - b.y))));
+      } else {
+        orbit.theta -= dx * 0.006;
+        orbit.phi = Math.max(0.15, Math.min(1.45, orbit.phi - dy * 0.006));
+      }
+      return;
+    }
+    if (e.pointerId === stick.id) { stick.dx = e.clientX - stick.x0; stick.dy = e.clientY - stick.y0; return; }
+    if (e.pointerType !== "mouse" || !locked) look(dx, dy, e.pointerType === "mouse" ? 0.004 : 0.006);
+  });
+  const up = (e) => {
+    touches.delete(e.pointerId);
+    if (e.pointerId === stick.id) { stick.id = null; stick.dx = stick.dy = 0; $("stick").hidden = true; }
+    if (touches.size < 2) pinch0 = 0;
+    dragging = null;
+  };
+  canvas.addEventListener("pointerup", up);
+  canvas.addEventListener("pointercancel", up);
+  canvas.addEventListener("wheel", (e) => {
+    if (mode !== "orbit") return;
+    e.preventDefault();
+    orbit.r = Math.max(5, Math.min(45, orbit.r * (1 + Math.sign(e.deltaY) * 0.08)));
+  }, { passive: false });
+
+  // ---------- зіткнення зі стінами ----------
+  const ray = new THREE.Raycaster();
+  const HEIGHTS = [0.35, 1.1, 1.75];
+  function blocked(from, dir, dist) {
+    ray.far = dist + RADIUS;
+    for (const h of HEIGHTS) {
+      ray.set(new THREE.Vector3(from.x, h, from.z), dir);
+      if (ray.intersectObjects(colliders, false).length) return true;
+    }
+    return false;
+  }
+  function tryMove(dx, dz) {
+    const dist = Math.hypot(dx, dz);
+    if (dist < 1e-6) return;
+    const p = player.pos;
+    const full = new THREE.Vector3(dx, 0, dz).normalize();
+    if (!blocked(p, full, dist)) { p.x += dx; p.z += dz; return; }
+    // ковзання вздовж стіни
+    if (Math.abs(dx) > 1e-6 && !blocked(p, new THREE.Vector3(Math.sign(dx), 0, 0), Math.abs(dx))) p.x += dx;
+    else if (Math.abs(dz) > 1e-6 && !blocked(p, new THREE.Vector3(0, 0, Math.sign(dz)), Math.abs(dz))) p.z += dz;
+  }
+
+  // ---------- у якій кімнаті я ----------
+  function inPoly(x, y, poly) {
+    let inside = false;
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      const [xi, yi] = poly[i], [xj, yj] = poly[j];
+      if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+    }
+    return inside;
+  }
+  let lastRoom = undefined, lastKey = "";
+  function updateRoom() {
+    const X = player.pos.x / MM, Y = -player.pos.z / MM;
+    const r = H.rooms.find((rr) => inPoly(X, Y, rr.poly)) || null;
+    const where = r ? r.id : (inPoly(X, Y, H.footprint) ? "door" : "out");
+    lastRoom = r;
+    if (where === lastKey) return;
+    lastKey = where;
+    const el = $("room");
+    if (!r) {
+      el.innerHTML = '<span class="code">—</span><span class="name">' +
+        (where === "door" ? "у дверному прорізі" : "надворі") + "</span>";
+      return;
+    }
+    const diff = r.area_bti ? " · БТІ " + r.area_bti.toFixed(1) : "";
+    el.innerHTML = '<span class="code">' + r.id + '</span><span class="name"></span>' +
+      '<span class="area">' + r.area.toFixed(2) + " м²" + diff + "</span>" +
+      (r.status && r.status !== "BTI" ? '<span class="tag">назва приблизна</span>' : "");
+    el.querySelector(".name").textContent = r.name;
+  }
+
+  // ---------- мінікарта ----------
+  const map = $("map");
+  const mctx = map.getContext("2d");
+  let mapScale = 1, mapOx = 0, mapOy = 0;
+  function sizeMap() {
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    const w = map.clientWidth, h = map.clientHeight;
+    map.width = w * dpr; map.height = h * dpr;
+    mctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const pad = 8;
+    const porch = 1500;   // місце під головний ґанок знизу
+    mapScale = Math.min((w - 2 * pad) / (maxX - minX), (h - 2 * pad) / (maxY - minY + porch));
+    mapOx = pad + ((w - 2 * pad) - (maxX - minX) * mapScale) / 2 - minX * mapScale;
+    mapOy = h - pad + (minY - porch) * mapScale;
+  }
+  const mx = (x) => mapOx + x * mapScale;
+  const my = (y) => mapOy - y * mapScale;
+  function polyPath(poly) {
+    mctx.beginPath();
+    poly.forEach((p, i) => (i ? mctx.lineTo(mx(p[0]), my(p[1])) : mctx.moveTo(mx(p[0]), my(p[1]))));
+    mctx.closePath();
+  }
+  function drawMap() {
+    if (!map.width) return;
+    const w = map.clientWidth, h = map.clientHeight;
+    mctx.clearRect(0, 0, w, h);
+    polyPath(H.footprint);
+    mctx.fillStyle = css("--ink-soft"); mctx.fill();
+    H.rooms.forEach((r) => {
+      polyPath(r.poly);
+      mctx.fillStyle = r === lastRoom ? css("--accent") : css("--paper");
+      mctx.globalAlpha = r === lastRoom ? 0.35 : 1;
+      mctx.fill(); mctx.globalAlpha = 1;
+    });
+    // двері — розриви кольору паперу
+    mctx.strokeStyle = css("--paper"); mctx.lineWidth = 3;
+    H.openings.filter((o) => o.type === "door").forEach((o) => {
+      mctx.beginPath(); mctx.moveTo(mx(o.p0[0]), my(o.p0[1])); mctx.lineTo(mx(o.p1[0]), my(o.p1[1])); mctx.stroke();
+    });
+    // гравець
+    const px = mx(player.pos.x / MM), py = my(-player.pos.z / MM);
+    const fwd = mode === "walk" ? player.yaw : Math.atan2(-(center.x - camera.position.x), -(center.z - camera.position.z));
+    mctx.fillStyle = css("--accent");
+    mctx.beginPath();
+    mctx.moveTo(px, py);
+    mctx.arc(px, py, 16, -Math.PI / 2 - fwd - 0.5, -Math.PI / 2 - fwd + 0.5);
+    mctx.closePath(); mctx.globalAlpha = 0.3; mctx.fill(); mctx.globalAlpha = 1;
+    mctx.beginPath(); mctx.arc(px, py, 3.5, 0, Math.PI * 2); mctx.fill();
+  }
+  map.addEventListener("pointerdown", (e) => {
+    const rect = map.getBoundingClientRect();
+    const X = (e.clientX - rect.left - mapOx) / mapScale;
+    const Y = (mapOy - (e.clientY - rect.top)) / mapScale;
+    const r = H.rooms.find((rr) => inPoly(X, Y, rr.poly));
+    const target = r ? centroid(r.poly) : [X, Y];
+    player.pos.copy(P(target[0], target[1], 0));
+    if (mode !== "walk") setMode("walk");
+    lastKey = "";
+  });
+
+  // ---------- цикл ----------
+  function resize() {
+    const w = innerWidth, h = innerHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+    sizeMap(); drawMap();
+  }
+  addEventListener("resize", resize);
+
+  let last = performance.now(), mapTick = 0;
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    if (mode === "walk") {
+      let f = 0, s = 0;
+      if (keys.KeyW || keys.ArrowUp) f += 1;
+      if (keys.KeyS || keys.ArrowDown) f -= 1;
+      if (keys.KeyD) s += 1;
+      if (keys.KeyA) s -= 1;
+      if (keys.ArrowLeft) player.yaw += 1.8 * dt;
+      if (keys.ArrowRight) player.yaw -= 1.8 * dt;
+      if (stick.id !== null) {
+        const m = Math.min(1, Math.hypot(stick.dx, stick.dy) / 46);
+        const a = Math.atan2(stick.dx, -stick.dy);
+        f += Math.cos(a) * m; s += Math.sin(a) * m;
+      }
+      const speed = (keys.ShiftLeft || keys.ShiftRight ? RUN : WALK) * dt;
+      const sin = Math.sin(player.yaw), cos = Math.cos(player.yaw);
+      tryMove((-sin * f + cos * s) * speed, (-cos * f - sin * s) * speed);
+      camera.position.set(player.pos.x, EYE, player.pos.z);
+      camera.rotation.set(player.pitch, player.yaw, 0, "YXZ");
+    } else {
+      const o = orbit;
+      camera.position.set(center.x + o.r * Math.sin(o.phi) * Math.sin(o.theta),
+                          o.r * Math.cos(o.phi),
+                          center.z + o.r * Math.sin(o.phi) * Math.cos(o.theta));
+      camera.lookAt(center.x, 0.5, center.z);
+    }
+    updateRoom();
+    if (now - mapTick > 80) { drawMap(); mapTick = now; }
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
+  new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  resize();
+  applyTheme();
+  setMode("walk");
+  requestAnimationFrame(frame);
+})();
+</script>

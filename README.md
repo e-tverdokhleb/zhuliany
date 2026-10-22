@@ -9,6 +9,16 @@
 
 ![План з FreeCAD](docs/freecad_plan.png)
 
+## 3D-прогулянка
+
+`web/walkthrough.html` — сторінка, по якій можна ходити будинком від першої особи (WASD + миша, на телефоні —
+пальцями) або дивитись згори. Геометрія береться з тієї самої FreeCAD-моделі. Після зміни конфігу:
+
+```
+freecadcmd tools/export_walkthrough.py   # FreeCAD-модель → web/model_data.js
+python tools/build_walkthrough.py        # дані → web/walkthrough.html
+```
+
 ## Запуск у FreeCAD
 
 1. Відкрий FreeCAD (потрібна версія 1.0 або новіша).
